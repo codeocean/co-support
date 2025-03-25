@@ -1,0 +1,84 @@
+from enum import Enum
+from typing import Dict
+
+
+class Questions(Enum):
+    VERSION = (
+        "Which version of Code Ocean do you intend to deploy (e.g., v3.4.1)?\n"
+    )
+    INTRODUCTION = (
+        "Would you like to answer a few questions? We can proceed without them"
+        ", but the results may be incomplete.\n[y/n]:"
+    )
+    HOSTING_DOMAIN = (
+        "What is your company's desired hosting domain? (Format: "
+        "codeocean.[COMPANYNAME].com):\n"
+    )
+    ROUTE53_EXISTING = (
+        "Are you using an existing Route 53 hosted zone in this AWS account?"
+        "\n[y/n]:"
+        "|Please provide the hosted zone ID:\n"
+    )
+    CERT_VALIDATION = (
+        "Has your SSL/TLS certificate been validated?\n[y/n]:"
+        "|Please provide the certificate ARN:\n"
+    )
+    PRIVATE_CA = (
+        "Is this certificate signed by a private CA?\n[y/n]:"
+    )
+    EXISTING_VPC = (
+        "Are you deploying Code Ocean to an existing VPC?\n[y/n]:"
+        "|Please provide the VPC ID:\n"
+    )
+    INTERNET_FACING = (
+        "Will your deployment be internet-facing?\n[y/n]:"
+    )
+
+
+def ask_questions(args) -> Dict[str, str]:
+    global _answers
+
+    _answers = {}
+    _answers[Questions.VERSION.name] = args.version
+    _answers[Questions.HOSTING_DOMAIN.name] = args.domain
+    _answers[Questions.ROUTE53_EXISTING.name] = args.hosted_zone
+    _answers[Questions.CERT_VALIDATION.name] = args.cert
+    _answers[Questions.PRIVATE_CA.name] = args.private_ca
+    _answers[Questions.EXISTING_VPC.name] = args.vpc
+    _answers[Questions.INTERNET_FACING.name] = args.internet_facing
+
+    if args.silent:
+        if not args.version:
+            raise ValueError("Version must be provided in silent mode.")
+        return _answers
+
+    for question in Questions:
+        if _answers.get(question.name):
+            continue
+
+        q = question.value.split("|")
+        response = ""
+        while not response.strip():
+            response = input(q[0] + " ").strip()
+            if len(q) > 1 and response.lower() == "y":
+                response = input(q[1] + " ").strip()
+
+        _answers[question.name] = response
+
+        if question == Questions.INTRODUCTION and response.lower() == "n":
+            break
+
+    return _answers
+
+
+def get_answer(question: Enum) -> str:
+    global _answers
+    if _answers is None:
+        raise ValueError("Answers have not been initialized.")
+    answer = _answers.get(question.name, "")
+    if isinstance(answer, str):
+        if answer.lower() == "n":
+            return False
+        elif answer.lower() == "y":
+            return True
+    return answer
