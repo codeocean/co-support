@@ -97,7 +97,8 @@ def run_checks(args):
             reference="prerequisites#elastic-ips",
             function=quota.check_available_eips,
             parameters={
-                "internet_facing": get_answer(Questions.INTERNET_FACING)
+                "internet_facing": get_answer(Questions.INTERNET_FACING),
+                "required_eips": 2,
             },
         ),
         Prerequisite(

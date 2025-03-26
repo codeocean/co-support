@@ -86,7 +86,7 @@ def check_shared_ami(params: Dict) -> Tuple[bool, str]:
         if response.get("Images"):
             return True, (
                 f"AMI {ami_id} in region {get_region()} "
-                "is shared with account {get_account()}"
+                f"is shared with account {get_account()}"
             )
     except ClientError as e:
         return False, f"Error checking AMI permissions: {e}"

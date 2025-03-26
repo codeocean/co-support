@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='co-assistant',
+    name='co-support',
     version='0.1',
     packages=find_packages(),
     install_requires=[
@@ -15,7 +15,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'co-assistant=co_assistant.main:main',
+            'co-support=co_support.main:main',
         ],
     },
 )
