@@ -1,5 +1,5 @@
 from .core.questions import ask_questions
-from .core.checks import run_checks
+from .core.checks import check_prerequisites
 from ..cmd import BaseCommand
 
 
@@ -69,4 +69,4 @@ class CheckPrerequisites(BaseCommand):
 
     def cmd(self, args):
         ask_questions(args)
-        run_checks(args)
+        check_prerequisites(args)

@@ -5,7 +5,7 @@ from .render import print_summary, print_yaml, print_table
 from ..checks import access, network, quota, domain
 
 
-def run_checks(args):
+def check_prerequisites(args):
     prerequisites = [
         Prerequisite(
             name="Administrator Access",
