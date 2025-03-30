@@ -12,7 +12,8 @@ from ..core.constants import SKIP_PREREQ
 
 def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:
     """
-    Checks if the provided hosted zone and domain are valid and properly configured.
+    Checks if the provided hosted zone and domain are valid
+    and properly configured.
     """
     hosted_zone_id = params.get("hosted_zone_id", "")
     hosting_domain = params.get("hosting_domain", "")
@@ -95,7 +96,8 @@ def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:
 
 def check_certificate(params: Dict[str, str]) -> Tuple[bool, str]:
     """
-    Validates the provided certificate ARN and checks its expiration and chain validity.
+    Validates the provided certificate ARN and checks its expiration
+    and chain validity.
     """
     cert_arn = params.get("cert_arn")
     is_private_ca = params.get("private_ca", False)
@@ -117,14 +119,6 @@ def check_certificate(params: Dict[str, str]) -> Tuple[bool, str]:
         days_left = (expires - datetime.now(timezone.utc)).days
         if days_left <= 0:
             return False, "Certificate is expired."
-
-        # Private CA-specific check
-        if is_private_ca:
-            if not cert_info.get("Issuer", "").startswith("Amazon"):
-                return False, (
-                    "Private CA certificate does not appear to be "
-                    "issued by a valid authority."
-                )
 
         # Get and verify chain
         cert_chain_response = acm.get_certificate(CertificateArn=cert_arn)

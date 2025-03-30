@@ -10,11 +10,14 @@ def check_prerequisites(args):
         Prerequisite(
             name="Administrator Access",
             description=(
-                "Checks if the executor user has the "
+                "Checks if the executor role has the "
                 "AdministratorAccess policy attached."
             ),
             reference="tinyurl.com/4cp49xmp",
             function=access.check_admin_access,
+            parameters={
+                "role_arn": get_answer(Questions.ROLE_ARN),
+            }
         ),
         Prerequisite(
             name="Shared AMI",
@@ -106,7 +109,10 @@ def check_prerequisites(args):
             ),
             reference="tinyurl.com/yzxf4yv2",
             function=network.check_existing_vpc,
-            parameters={"vpc_id": get_answer(Questions.EXISTING_VPC)},
+            parameters={
+                "vpc_id": get_answer(Questions.EXISTING_VPC),
+                "internet_facing": get_answer(Questions.INTERNET_FACING),
+            },
         ),
         Prerequisite(
             name="Hosted Zone",

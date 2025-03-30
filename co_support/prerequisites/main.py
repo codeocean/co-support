@@ -39,6 +39,13 @@ class CheckPrerequisites(BaseCommand):
             help="Version of Code Ocean to deploy (e.g., v3.4.1)",
         )
         self.parser.add_argument(
+            "--role",
+            help=(
+                "ARN of the IAM role to deploy the Code Ocean template "
+                "(e.g., arn:aws:iam::account-id:role/role-name)"
+            ),
+        )
+        self.parser.add_argument(
             "--domain",
             help="Domain for the deployment (e.g., codeocean.company.com)",
         )

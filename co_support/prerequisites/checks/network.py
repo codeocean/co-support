@@ -7,7 +7,8 @@ from ..core.constants import SKIP_PREREQ
 
 def check_existing_vpc(params: Dict[str, str]) -> Tuple[bool, str]:
     """
-    Checks if the specified VPC exists and meets the required subnet and internet access configurations.
+    Checks if the specified VPC exists and meets the required subnet
+    and internet access configurations.
     """
     vpc_id = params.get("vpc_id", "")
 
@@ -40,19 +41,23 @@ def check_existing_vpc(params: Dict[str, str]) -> Tuple[bool, str]:
         subnet for subnet in subnets if subnet["MapPublicIpOnLaunch"] is True
     ]
 
+    subnets_to_check = private_subnets
+
     if len(private_subnets) < 2:
         return False, (
             "VPC must have at least 2 private subnets. "
             f"Found: {len(private_subnets)}"
         )
 
-    if len(public_subnets) < 2:
-        return False, (
-            "VPC must have at least 2 public subnets for "
-            f"internet-facing deployment. Found: {len(public_subnets)}"
-        )
+    if params.get("internet_facing", ""):
+        if len(public_subnets) < 2:
+            return False, (
+                "VPC must have at least 2 public subnets for "
+                f"internet-facing deployment. Found: {len(public_subnets)}"
+            )
+        subnets_to_check += public_subnets
 
-    for subnet in subnets:
+    for subnet in subnets_to_check:
         cidr_block = subnet["CidrBlock"]
         cidr_block_range = int(cidr_block.split("/")[1])
         if cidr_block_range > 24:
