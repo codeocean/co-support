@@ -1,7 +1,7 @@
-argparse
-boto3
-requests
-PyYAML
-prettytable
-colorama
-dnspython
+"argparse"
+"boto3"
+"requests"
+"PyYAML"
+"prettytable"
+"colorama"
+"dnspython"

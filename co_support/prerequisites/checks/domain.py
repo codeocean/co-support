@@ -1,16 +1,19 @@
-import boto3
-import dns.resolver
 import os
 import subprocess
 import tempfile
-
 from datetime import datetime, timezone
 from typing import Dict, Tuple
+
+import boto3
+import dns.resolver
 
 from ..core.constants import SKIP_PREREQ
 
 
-def check_hosted_zone(params: Dict) -> Tuple[bool, str]:
+def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:
+    """
+    Checks if the provided hosted zone and domain are valid and properly configured.
+    """
     hosted_zone_id = params.get("hosted_zone_id", "")
     hosting_domain = params.get("hosting_domain", "")
 
@@ -32,8 +35,7 @@ def check_hosted_zone(params: Dict) -> Tuple[bool, str]:
     try:
         response = route53_client.get_hosted_zone(Id=hosted_zone_id)
         subdomain_name_servers = response.get(
-            "DelegationSet",
-            {},
+            "DelegationSet", {}
         ).get("NameServers", [])
 
         if not subdomain_name_servers:
@@ -48,7 +50,7 @@ def check_hosted_zone(params: Dict) -> Tuple[bool, str]:
                 zone for zone in hosted_zones
                 if zone["Name"].strip(".") == parent_domain
             ),
-            None
+            None,
         )
 
         if not parent_zone:
@@ -91,7 +93,10 @@ def check_hosted_zone(params: Dict) -> Tuple[bool, str]:
         return False, f"Error accessing hosted zone: {str(e)}"
 
 
-def check_certificate(params: Dict) -> Tuple[bool, str]:
+def check_certificate(params: Dict[str, str]) -> Tuple[bool, str]:
+    """
+    Validates the provided certificate ARN and checks its expiration and chain validity.
+    """
     cert_arn = params.get("cert_arn")
     is_private_ca = params.get("private_ca", False)
 
@@ -130,18 +135,14 @@ def check_certificate(params: Dict) -> Tuple[bool, str]:
             return False, "Certificate body not found."
 
         with tempfile.NamedTemporaryFile(
-            delete=False,
-            mode='w',
-            suffix=".pem"
+            delete=False, mode="w", suffix=".pem"
         ) as cert_file:
             cert_file.write(cert_pem)
             cert_path = cert_file.name
 
         if chain_pem:
             with tempfile.NamedTemporaryFile(
-                delete=False,
-                mode='w',
-                suffix=".pem"
+                delete=False, mode="w", suffix=".pem"
             ) as chain_file:
                 chain_file.write(chain_pem)
                 chain_path = chain_file.name
@@ -153,8 +154,7 @@ def check_certificate(params: Dict) -> Tuple[bool, str]:
             openssl_cmd += ["-CAfile", chain_path, cert_path]
 
             result = subprocess.run(
-                openssl_cmd,
-                capture_output=True, text=True
+                openssl_cmd, capture_output=True, text=True
             )
 
             if result.returncode != 0:
@@ -168,7 +168,7 @@ def check_certificate(params: Dict) -> Tuple[bool, str]:
         return False, f"Error while checking certificate: {str(e)}"
 
     finally:
-        if 'cert_path' in locals() and os.path.exists(cert_path):
+        if "cert_path" in locals() and os.path.exists(cert_path):
             os.remove(cert_path)
-        if 'chain_path' in locals() and os.path.exists(chain_path):
+        if "chain_path" in locals() and os.path.exists(chain_path):
             os.remove(chain_path)

@@ -1,72 +1,79 @@
+from argparse import _SubParsersAction
 from .core.questions import ask_questions
 from .core.checks import check_prerequisites
 from ..cmd import BaseCommand
 
 
-def commands(subparsers):
+def commands(subparsers: _SubParsersAction) -> None:
     """
-    Check prerequisites for Code Ocean deployment.
+    Register the 'check-prerequisites' command with the argument parser.
     """
     CheckPrerequisites(subparsers)
 
 
 class CheckPrerequisites(BaseCommand):
     """
-    Check prerequisites for Code Ocean deployment.
+    Command to check prerequisites for Code Ocean deployment.
     """
 
-    def __init__(self, subparsers):
-        super().__init__(subparsers, 'check-prerequisites')
+    def __init__(self, subparsers: _SubParsersAction) -> None:
+        super().__init__(subparsers, "check-prerequisites")
         self.parser.add_argument(
-            '-s', '--silent',
-            help='Run the script in silent mode',
-            action='store_true'
+            "-s", "--silent",
+            help="Run the script in silent mode",
+            action="store_true",
         )
         self.parser.add_argument(
-            '-f', '--format',
-            choices=['table', 'yaml'],
-            default='table',
-            help='Output format: table or yaml'
+            "-f", "--format",
+            choices=["table", "yaml"],
+            default="table",
+            help="Output format: table or yaml",
         )
         self.parser.add_argument(
-            '-o', '--output',
-            help='Output file path',
-            default=None
+            "-o", "--output",
+            help="Output file path",
+            default=None,
         )
         self.parser.add_argument(
-            '--version',
-            help='Version of Code Ocean to deploy (e.g., v3.4.1)'
+            "--version",
+            help="Version of Code Ocean to deploy (e.g., v3.4.1)",
         )
         self.parser.add_argument(
-            '--domain',
-            help='Domain for the deployment (e.g., codeocean.company.com)'
+            "--domain",
+            help="Domain for the deployment (e.g., codeocean.company.com)",
         )
         self.parser.add_argument(
-            '--hosted-zone',
-            help='Hosted zone ID for the deployment (e.g., Z3P5QSUBK4POTI)'
+            "--hosted-zone",
+            help="Hosted zone ID for the deployment (e.g., Z3P5QSUBK4POTI)",
         )
         self.parser.add_argument(
-            '--cert',
+            "--cert",
             help=(
                 "ARN of the SSL/TLS certificate "
                 "(e.g., arn:aws:acm:region:account:certificate/certificate-id)"
-            )
+            ),
         )
         self.parser.add_argument(
-            '--private-ca',
-            help='Indicate if the certificate is signed by a private CA',
-            action='store_true'
+            "--private-ca",
+            help="Indicate if the certificate is signed by a private CA",
+            action="store_true",
         )
         self.parser.add_argument(
-            '--vpc',
-            help='ID of the existing VPC (e.g., vpc-0bb1c79de3fd22e7d)'
+            "--vpc",
+            help="ID of the existing VPC (e.g., vpc-0bb1c79de3fd22e7d)",
         )
         self.parser.add_argument(
-            '--internet-facing',
-            help='Indicate if the deployment is internet-facing',
-            action='store_true'
+            "--internet-facing",
+            help="Indicate if the deployment is internet-facing",
+            action="store_true",
         )
 
-    def cmd(self, args):
-        ask_questions(args)
-        check_prerequisites(args)
+    def cmd(self, args) -> None:
+        """
+        Execute the 'check-prerequisites' command.
+        """
+        try:
+            ask_questions(args)
+            check_prerequisites(args)
+        except Exception as e:
+            print(f"Error: {e}")

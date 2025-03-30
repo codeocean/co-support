@@ -1,11 +1,14 @@
-import boto3
-
 from typing import Dict, Tuple
+
+import boto3
 
 from ..core.constants import SKIP_PREREQ, get_region
 
 
-def check_vcpu_quota(params: Dict) -> Tuple[bool, str]:
+def check_vcpu_quota(params: Dict[str, int]) -> Tuple[bool, str]:
+    """
+    Checks if the required vCPUs are available within the quota limits.
+    """
     required_vcpus = params.get("required_vcpus")
     service_code = params.get("service_code", "ec2")
     quota_code = params.get("quota_code")
@@ -16,7 +19,7 @@ def check_vcpu_quota(params: Dict) -> Tuple[bool, str]:
     try:
         quota_response = service_quotas.get_service_quota(
             ServiceCode=service_code,
-            QuotaCode=quota_code
+            QuotaCode=quota_code,
         )
         vcpu_limit = int(quota_response["Quota"]["Value"])
 
@@ -32,7 +35,7 @@ def check_vcpu_quota(params: Dict) -> Tuple[bool, str]:
             Filters=[
                 {
                     "Name": "instance-state-name",
-                    "Values": ["pending", "running"]
+                    "Values": ["pending", "running"],
                 }
             ]
         )
@@ -64,7 +67,10 @@ def check_vcpu_quota(params: Dict) -> Tuple[bool, str]:
         return False, f"Error calculating used vCPUs: {str(e)}"
 
 
-def check_available_eips(params: Dict) -> Tuple[bool, str]:
+def check_available_eips(params: Dict[str, int]) -> Tuple[bool, str]:
+    """
+    Checks if the required Elastic IPs (EIPs) are available within the quota limits.
+    """
     if not params.get("internet_facing"):
         return SKIP_PREREQ
 
@@ -83,10 +89,11 @@ def check_available_eips(params: Dict) -> Tuple[bool, str]:
         total_allocated = len(addresses)
         quota_response = sq_client.get_service_quota(
             ServiceCode="ec2",
-            QuotaCode="L-0263D0A3"
+            QuotaCode="L-0263D0A3",
         )
         quota_limit = int(quota_response["Quota"]["Value"])
         remaining_quota = quota_limit - total_allocated
+
         if remaining_quota < required_eips:
             return False, (
                 f"EIP quota exceeded in {get_region()}: {total_allocated}/"

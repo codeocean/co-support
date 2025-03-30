@@ -1,10 +1,12 @@
 import yaml
-
 from prettytable import PrettyTable, HRuleStyle, VRuleStyle
 from colorama import Fore, Style
 
 
-def print_yaml(titles, data):
+def print_yaml(titles: list[str], data: list[list]) -> str:
+    """
+    Converts data into a YAML-formatted string.
+    """
     yaml_data = []
     for p in data:
         entry = {titles[i]: p[i] for i in range(len(titles))}
@@ -12,7 +14,10 @@ def print_yaml(titles, data):
     return yaml.dump(yaml_data, default_flow_style=False, width=float("inf"))
 
 
-def print_table(titles, data):
+def print_table(titles: list[str], data: list[list]) -> PrettyTable:
+    """
+    Creates a formatted table using PrettyTable.
+    """
     table = PrettyTable()
     table.field_names = titles
     table.hrules = HRuleStyle.ALL
@@ -23,12 +28,15 @@ def print_table(titles, data):
     table.valign = "m"
 
     for p in data:
-        table.add_row([('✔' if p[0] else '✘'), *p[1:]])
+        table.add_row([("✔" if p[0] else "✘"), *p[1:]])
 
     return table
 
 
-def print_summary(total_failed):
+def print_summary(total_failed: int) -> None:
+    """
+    Prints a summary of the prerequisite checks.
+    """
     if total_failed == 0:
         print(Fore.GREEN + "✅ All prerequisites are met!" + Style.RESET_ALL)
     else:
