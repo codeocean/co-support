@@ -13,7 +13,7 @@ def check_prerequisites(args):
                 "Checks if the executor user has the "
                 "AdministratorAccess policy attached."
             ),
-            reference="deployment-iam-role",
+            reference="tinyurl.com/4cp49xmp",
             function=access.check_admin_access,
         ),
         Prerequisite(
@@ -22,7 +22,7 @@ def check_prerequisites(args):
                 "Verifies if the required AMI is shared with "
                 "the account in the specified region."
             ),
-            reference="prerequisites#request-code-ocean-amis",
+            reference="tinyurl.com/mrusuenn",
             function=access.check_shared_ami,
             parameters={"version": get_answer(Questions.VERSION)},
         ),
@@ -32,7 +32,7 @@ def check_prerequisites(args):
                 "Checks that the VPC's DHCP options are set up "
                 "to resolve domain names using Amazon DNS."
             ),
-            reference="prerequisites#networking",
+            reference="tinyurl.com/yzxf4yv2",
             function=network.check_dhcp_options,
             parameters={"vpc_id": get_answer(Questions.EXISTING_VPC)},
         ),
@@ -41,7 +41,7 @@ def check_prerequisites(args):
             description=(
                 "Checks if the required AWS service-linked roles exist."
             ),
-            reference="prerequisites#create-aws-iam-service-linked-roles",
+            reference="tinyurl.com/ycyk9fr9",
             function=access.check_linked_roles,
             parameters={
                 "roles": [
@@ -62,10 +62,7 @@ def check_prerequisites(args):
                 "Checks if the vCPU quota for On-Demand Standard "
                 "instances is sufficient."
             ),
-            reference=(
-                "prerequisites#running-on-demand-standard"
-                "-a-c-d-h-i-m-r-t-z-instances"
-            ),
+            reference="tinyurl.com/mwz5s3th",
             function=quota.check_vcpu_quota,
             parameters={
                 "quota_code": "L-1216C47A",
@@ -80,7 +77,7 @@ def check_prerequisites(args):
                 "Checks if the vCPU quota for On-Demand G and VT "
                 "instances is sufficient."
             ),
-            reference="prerequisites#running-on-demand-g-and-vt-instances",
+            reference="tinyurl.com/3c2pvau2",
             function=quota.check_vcpu_quota,
             parameters={
                 "quota_code": "L-DB2E81BA",
@@ -94,7 +91,7 @@ def check_prerequisites(args):
             description=(
                 "Checks if there are enough available Elastic IPs and quota."
             ),
-            reference="prerequisites#elastic-ips",
+            reference="tinyurl.com/2878e6at",
             function=quota.check_available_eips,
             parameters={
                 "internet_facing": get_answer(Questions.INTERNET_FACING),
@@ -107,7 +104,7 @@ def check_prerequisites(args):
                 "Validates the existing VPC for required subnets and "
                 "internet access configurations."
             ),
-            reference="prerequisites#networking",
+            reference="tinyurl.com/yzxf4yv2",
             function=network.check_existing_vpc,
             parameters={"vpc_id": get_answer(Questions.EXISTING_VPC)},
         ),
@@ -117,7 +114,7 @@ def check_prerequisites(args):
                 "Checks if the hosted zone and its parent domain "
                 "are correctly configured."
             ),
-            reference="prerequisites#choose-a-hosting-domain",
+            reference="tinyurl.com/vsnm7avd",
             function=domain.check_hosted_zone,
             parameters={
                 "hosting_domain": get_answer(Questions.HOSTING_DOMAIN),
@@ -129,7 +126,7 @@ def check_prerequisites(args):
             description=(
                 "Validates the SSL/TLS certificate and its chain of trust."
             ),
-            reference="prerequisites#ssl-certificate-validation",
+            reference="tinyurl.com/bdfp2a4s",
             function=domain.check_certificate,
             parameters={
                 "cert_arn": get_answer(Questions.CERT_VALIDATION),
