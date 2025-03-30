@@ -25,12 +25,10 @@ def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:
     if len(domain_parts) < 3:
         return False, (
             "Invalid domain format. "
-            "Expected a subdomain structure (e.g., x.y.z)."
+            "Expected a subdomain structure (e.g., codeocean.company.com)."
         )
 
-    # Get the parent domain (e.g., y.z)
     parent_domain = ".".join(domain_parts[1:])
-
     route53_client = boto3.client("route53")
 
     try:

@@ -18,7 +18,7 @@ pip install -e .
 
 ## Usage
 ```bash
-usage: co-support check-prerequisites [-h] [-s] [-f {table,yaml}] [-o OUTPUT] [--version VERSION] [--domain DOMAIN]
+usage: co-support check-prerequisites [-h] [-s] [-f {table,yaml}] [-o OUTPUT] [--version VERSION] [--role ROLE] [--domain DOMAIN]
                                       [--hosted-zone HOSTED_ZONE] [--cert CERT] [--private-ca] [--vpc VPC] [--internet-facing]
 
 options:
@@ -28,13 +28,15 @@ options:
                         Output format: table or yaml (default: table)
   -o, --output OUTPUT   Output file path (default: None)
   --version VERSION     Version of Code Ocean to deploy (e.g., v3.4.1) (default: None)
+  --role ROLE           ARN of the IAM role to deploy the Code Ocean template (e.g., arn:aws:iam::account-id:role/role-name) (default:
+                        None)
   --domain DOMAIN       Domain for the deployment (e.g., codeocean.company.com) (default: None)
   --hosted-zone HOSTED_ZONE
                         Hosted zone ID for the deployment (e.g., Z3P5QSUBK4POTI) (default: None)
   --cert CERT           ARN of the SSL/TLS certificate (e.g., arn:aws:acm:region:account:certificate/certificate-id) (default: None)
   --private-ca          Indicate if the certificate is signed by a private CA (default: False)
   --vpc VPC             ID of the existing VPC (e.g., vpc-0bb1c79de3fd22e7d) (default: None)
-  --internet-facing     Indicate if the deployment is internet-facing (default: False)
+  --internet-facing     Indicate if the deployment is internet-facing (default: True)
 ```
 
 ### Interactive Example
@@ -45,13 +47,14 @@ co-support check-prerequisites
 ### Silent Example
 ```bash
 co-support check-prerequisites -s \
-    --private-ca \
-    --internet-facing \
     --version v3.4.1 \
+    --internet-facing \
     --domain codeocean.acmecorp.com \
     --hosted-zone A0B1C2D3E4F5G6H7I8J9 \
-    --cert arn:aws:acm:us-east-1:0000000000:certificate/01234567-890a-bcde-f012-3456789000 \
-    --vpc vpc-0123456789abcdeff
+    --cert arn:aws:acm:us-east-1:000000000000:certificate/01234567-890a-bcde-f012-3456789000 \
+    --vpc vpc-0123456789abcdeff \
+    --role arn:aws:iam::000000000000:role/Administrator
+    --private-ca \
 ```
 
 ## Notes

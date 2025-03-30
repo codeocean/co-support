@@ -46,14 +46,14 @@ def check_existing_vpc(params: Dict[str, str]) -> Tuple[bool, str]:
     if len(private_subnets) < 2:
         return False, (
             "VPC must have at least 2 private subnets. "
-            f"Found: {len(private_subnets)}"
+            f"Found: {len(private_subnets)}."
         )
 
     if params.get("internet_facing", ""):
         if len(public_subnets) < 2:
             return False, (
                 "VPC must have at least 2 public subnets for "
-                f"internet-facing deployment. Found: {len(public_subnets)}"
+                f"internet-facing deployment. Found: {len(public_subnets)}."
             )
         subnets_to_check += public_subnets
 

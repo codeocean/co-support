@@ -73,6 +73,7 @@ class CheckPrerequisites(BaseCommand):
             "--internet-facing",
             help="Indicate if the deployment is internet-facing",
             action="store_true",
+            default=True,
         )
 
     def cmd(self, args) -> None:
