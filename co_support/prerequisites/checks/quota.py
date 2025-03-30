@@ -55,7 +55,9 @@ def check_vcpu_quota(params: Dict[str, int]) -> Tuple[bool, str]:
 
         if available_vcpus >= required_vcpus:
             return True, (
-                f"{available_vcpus} vCPUs available out of {vcpu_limit}."
+                f"{available_vcpus} vCPUs are available out of a total "
+                f"quota of {vcpu_limit}, meeting the requirement "
+                f"of {required_vcpus}."
             )
         else:
             return False, (
@@ -69,7 +71,8 @@ def check_vcpu_quota(params: Dict[str, int]) -> Tuple[bool, str]:
 
 def check_available_eips(params: Dict[str, int]) -> Tuple[bool, str]:
     """
-    Checks if the required Elastic IPs (EIPs) are available within the quota limits.
+    Checks if the required Elastic IPs (EIPs) are available
+    within the quota limits.
     """
     if not params.get("internet_facing"):
         return SKIP_PREREQ
@@ -82,10 +85,6 @@ def check_available_eips(params: Dict[str, int]) -> Tuple[bool, str]:
     try:
         eips_response = ec2_client.describe_addresses()
         addresses = eips_response.get("Addresses", [])
-        available_eips = [
-            eip for eip in addresses if "AssociationId" not in eip
-        ]
-        available_count = len(available_eips)
         total_allocated = len(addresses)
         quota_response = sq_client.get_service_quota(
             ServiceCode="ec2",
@@ -101,8 +100,9 @@ def check_available_eips(params: Dict[str, int]) -> Tuple[bool, str]:
             )
 
         return True, (
-            f"{available_count} available Elastic IP(s), "
-            f"{remaining_quota} remaining in quota."
+            f"{remaining_quota} EIPs are available out of a total "
+            f"quota of {quota_limit}, meeting the requirement "
+            f"of {required_eips}."
         )
 
     except Exception as e:
