@@ -6,7 +6,7 @@ from ..cmd import BaseCommand
 
 def commands(subparsers: _SubParsersAction) -> None:
     """
-    Register the 'check-prerequisites' command with the argument parser.
+    Registers all commands for the prerequisites module.
     """
     CheckPrerequisites(subparsers)
 
@@ -70,7 +70,7 @@ class CheckPrerequisites(BaseCommand):
 
     def cmd(self, args) -> None:
         """
-        Execute the 'check-prerequisites' command.
+        Executes the 'check-prerequisites' command.
         """
         try:
             ask_questions(args)
