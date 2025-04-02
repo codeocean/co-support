@@ -7,7 +7,6 @@ from .prerequisites.main import commands as prerequisites_commands
 
 def parse_args():
     parser = argparse.ArgumentParser()
-
     subparsers = parser.add_subparsers()
     prerequisites_commands(subparsers)
 

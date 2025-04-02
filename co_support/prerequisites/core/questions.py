@@ -67,7 +67,10 @@ def ask_questions(args) -> Dict[str, str]:
             raise ValueError("Version must be provided in silent mode.")
         return _answers
 
-    def extract_sec_value(question: str) -> str:
+    def default_value(question: str) -> str:
+        """
+        Extracts the default value from a question string.
+        """
         matches = re.findall(r"\[([yn])/([yn])\]", question, re.IGNORECASE)
         for match in matches:
             return match[1]
@@ -81,7 +84,7 @@ def ask_questions(args) -> Dict[str, str]:
         while not response.strip():
             response = input(q[0] + " ").strip()
             if (
-                response.lower() == extract_sec_value(q[0])
+                response.lower() == default_value(q[0])
                 and len(q) > 1
             ):
                 response = input(q[1] + " ").strip()
@@ -101,10 +104,9 @@ def get_answer(question: Enum) -> str:
     global _answers
     if _answers is None:
         raise ValueError("Answers have not been initialized.")
+
     answer = _answers.get(question.name, "")
-    if isinstance(answer, str):
-        if answer.lower() == "n":
-            return False
-        elif answer.lower() == "y":
-            return True
+    if isinstance(answer, str) and answer.lower() in ["y", "n"]:
+        answer = answer.lower() == "y"
+
     return answer

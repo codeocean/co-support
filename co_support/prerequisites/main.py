@@ -1,4 +1,5 @@
-from argparse import _SubParsersAction
+from argparse import _SubParsersAction, BooleanOptionalAction
+
 from .core.questions import ask_questions
 from .core.checks import check_prerequisites
 from ..cmd import BaseCommand
@@ -21,7 +22,8 @@ class CheckPrerequisites(BaseCommand):
         self.parser.add_argument(
             "-s", "--silent",
             help="Run the script in silent mode",
-            action="store_true",
+            action=BooleanOptionalAction,
+            default=False,
         )
         self.parser.add_argument(
             "-f", "--format",
@@ -31,7 +33,7 @@ class CheckPrerequisites(BaseCommand):
         )
         self.parser.add_argument(
             "-o", "--output",
-            help="Output file path",
+            help="Path to the directory where the output file will be saved",
             default=None,
         )
         self.parser.add_argument(
@@ -63,7 +65,8 @@ class CheckPrerequisites(BaseCommand):
         self.parser.add_argument(
             "--private-ca",
             help="Indicate if the certificate is signed by a private CA",
-            action="store_true",
+            action=BooleanOptionalAction,
+            default=False,
         )
         self.parser.add_argument(
             "--vpc",
@@ -72,7 +75,7 @@ class CheckPrerequisites(BaseCommand):
         self.parser.add_argument(
             "--internet-facing",
             help="Indicate if the deployment is internet-facing",
-            action="store_true",
+            action=BooleanOptionalAction,
             default=True,
         )
 

@@ -17,79 +17,102 @@ def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:
     """
     hosted_zone_id = params.get("hosted_zone_id", "")
     hosting_domain = params.get("hosting_domain", "")
+    internet_facing = params.get("internet_facing", False)
 
     if not hosting_domain or not hosted_zone_id:
         return SKIP_PREREQ
 
     domain_parts = hosting_domain.split(".")
+    second_level_domain = ".".join(domain_parts[1:])
+
     if len(domain_parts) < 3:
         return False, (
             "Invalid domain format. "
             "Expected a subdomain structure (e.g., codeocean.company.com)."
         )
 
-    parent_domain = ".".join(domain_parts[1:])
     route53_client = boto3.client("route53")
 
     try:
-        response = route53_client.get_hosted_zone(Id=hosted_zone_id)
-        subdomain_name_servers = response.get(
-            "DelegationSet", {}
-        ).get("NameServers", [])
+        zone_details = route53_client.get_hosted_zone(Id=hosted_zone_id)
+        zone_name = zone_details.get(
+            "HostedZone",
+            {}
+        ).get("Name", "").strip(".")
 
-        if not subdomain_name_servers:
+        if zone_name not in [hosting_domain, second_level_domain]:
             return False, (
-                "No name servers found "
-                "for the hosted zone delegation set."
+                f"The hosted zone name {zone_name} does not match "
+                f"the provided domain {hosting_domain} or its parent domain."
             )
 
-        hosted_zones = route53_client.list_hosted_zones()["HostedZones"]
-        parent_zone = next(
-            (
-                zone for zone in hosted_zones
-                if zone["Name"].strip(".") == parent_domain
-            ),
-            None,
-        )
+        is_private_zone = zone_details.get(
+            "Config",
+            {},
+        ).get("PrivateZone", False)
 
-        if not parent_zone:
-            try:
-                resolver = dns.resolver.Resolver()
-                answer = resolver.resolve(parent_domain, "NS")
-                parent_ns_records = [rdata.to_text() for rdata in answer]
-
-                if not parent_ns_records:
-                    return False, (
-                        f"Parent domain {parent_domain} "
-                        "has no NS records."
-                    )
-
-                return True, (
-                    f"Parent domain {parent_domain} "
-                    "is externally managed."
-                )
-            except Exception:
+        if is_private_zone:
+            if internet_facing:
                 return False, (
-                    f"Parent domain {parent_domain} "
-                    "does not resolve from any name server."
+                    "The specified hosted zone is private. A public hosted "
+                    "zone is required for an internet-facing deployment."
                 )
 
-        parent_zone_id = parent_zone["Id"].split("/")[-1]
-        parent_zone_records = route53_client.list_resource_record_sets(
-            HostedZoneId=parent_zone_id
-        )["ResourceRecordSets"]
-
-        ns_records = [r for r in parent_zone_records if r["Type"] == "NS"]
-        if not ns_records:
-            return False, (
-                f"Parent domain {parent_domain} "
-                "is hosted in Route 53 but has no NS records."
+            True, (
+                f"The private hosted zone {hosted_zone_id} is correctly "
+                "associated with the provided domain or its parent domain."
             )
-
-        return True, f"Parent domain {parent_domain} is available in Route 53."
-
     except Exception as e:
         return False, f"Error accessing hosted zone: {str(e)}"
+
+    try:
+        answer = dns.resolver.resolve(zone_name, "NS")
+        resolved_ns_records = [rdata.to_text().rstrip('.') for rdata in answer]
+        if not resolved_ns_records:
+            return False, (
+                f"Delegation is not configured correctly. "
+                f"The NS record for the domain {zone_name} is not resolvable."
+            )
+        zone_ns_records = zone_details.get(
+            "DelegationSet",
+            {},
+        ).get("NameServers", [])
+
+        if set(resolved_ns_records) != set(zone_ns_records):
+            return False, (
+                f"Domain {zone_name} NS records do not match "
+                f"the NS records of the hosted zone {hosted_zone_id}."
+            )
+    except Exception as e:
+        return False, f"Error while resolving NS records: {str(e)}"
+
+    try:
+        record_sets = route53_client.list_resource_record_sets(
+            HostedZoneId=hosted_zone_id
+        )
+        a_records = set([
+            record["Name"] for record in record_sets.get("ResourceRecordSets", [])
+            if record.get("Type") == "A"
+        ])
+
+        records_to_check = set([
+            f"{hosting_domain}.",
+            f"registry.{hosting_domain}.",
+            f"analytics.{hosting_domain}."
+        ])
+
+        if records_to_check & a_records:
+            return False, (
+                "One of the Code Ocean A records was found in the hosted "
+                "zone. These records should not be present and are expected "
+                "to be created during the deployment process."
+            )
+    except Exception as e:
+        return False, f"Error while checking A records: {str(e)}"
+
+    return True, (
+        "Hosted zone is valid and properly configured."
+    )
 
 
 def check_certificate(params: Dict[str, str]) -> Tuple[bool, str]:
@@ -99,18 +122,27 @@ def check_certificate(params: Dict[str, str]) -> Tuple[bool, str]:
     """
     cert_arn = params.get("cert_arn")
     is_private_ca = params.get("private_ca", False)
+    hosting_domain = params.get("hosting_domain")
 
-    if not cert_arn:
+    if not cert_arn or not hosting_domain:
         return SKIP_PREREQ
 
     acm = boto3.client("acm")
 
     try:
         cert_details = acm.describe_certificate(CertificateArn=cert_arn)
-        cert_info = cert_details["Certificate"]
+        subject_alternative_names = set(cert_details["Certificate"].get(
+            "SubjectAlternativeNames",
+            [],
+        ))
+        required_names = set([hosting_domain, f"*.{hosting_domain}"])
+        if not required_names.issubset(subject_alternative_names):
+            return False, (
+                f"Certificate does not cover the required domains: "
+                f"{', '.join(required_names)}."
+            )
 
-        # Expiration check
-        expires = cert_info.get("NotAfter")
+        expires = cert_details["Certificate"].get("NotAfter")
         if not expires:
             return False, "Certificate expiration date not found."
 
@@ -118,10 +150,9 @@ def check_certificate(params: Dict[str, str]) -> Tuple[bool, str]:
         if days_left <= 0:
             return False, "Certificate is expired."
 
-        # Get and verify chain
-        cert_chain_response = acm.get_certificate(CertificateArn=cert_arn)
-        cert_pem = cert_chain_response.get("Certificate")
-        chain_pem = cert_chain_response.get("CertificateChain")
+        cert = acm.get_certificate(CertificateArn=cert_arn)
+        cert_pem = cert.get("Certificate")
+        chain_pem = cert.get("CertificateChain")
 
         if not cert_pem:
             return False, "Certificate body not found."
@@ -139,7 +170,6 @@ def check_certificate(params: Dict[str, str]) -> Tuple[bool, str]:
                 chain_file.write(chain_pem)
                 chain_path = chain_file.name
 
-            # Choose openssl command
             openssl_cmd = ["openssl", "verify"]
             if not is_private_ca:
                 openssl_cmd.append("-partial_chain")

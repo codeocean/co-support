@@ -88,9 +88,9 @@ def check_shared_ami(params: Dict[str, str]) -> Tuple[bool, str]:
     )
 
     try:
-        yaml_content = yaml.safe_load(requests.get(yaml_url).text)
+        yaml_content = yaml.safe_load(requests.get(yaml_url, "").text)
         mappings = yaml_content.get("Mappings", {})
-        ami_id = mappings.get("AMIs", {}).get(get_region(), {}).get("id")
+        ami_id = mappings.get("AMIs", {}).get(get_region(), {}).get("id", "")
         if not ami_id:
             return False, (
                 f"The current region {get_region()} "

@@ -18,25 +18,27 @@ pip install -e .
 
 ## Usage
 ```bash
-usage: co-support check-prerequisites [-h] [-s] [-f {table,yaml}] [-o OUTPUT] [--version VERSION] [--role ROLE] [--domain DOMAIN]
-                                      [--hosted-zone HOSTED_ZONE] [--cert CERT] [--private-ca] [--vpc VPC] [--internet-facing]
+usage: co-support check-prerequisites [-h] [-s | --silent | --no-silent] [-f {table,yaml}] [-o OUTPUT] [--version VERSION] [--role ROLE] [--domain DOMAIN] [--hosted-zone HOSTED_ZONE] [--cert CERT]
+                                      [--private-ca | --no-private-ca] [--vpc VPC] [--internet-facing | --no-internet-facing]
 
 options:
   -h, --help            show this help message and exit
-  -s, --silent          Run the script in silent mode (default: False)
+  -s, --silent, --no-silent
+                        Run the script in silent mode (default: False)
   -f, --format {table,yaml}
                         Output format: table or yaml (default: table)
-  -o, --output OUTPUT   Output file path (default: None)
+  -o, --output OUTPUT   Path to the directory where the output file will be saved (default: None)
   --version VERSION     Version of Code Ocean to deploy (e.g., v3.4.1) (default: None)
-  --role ROLE           ARN of the IAM role to deploy the Code Ocean template (e.g., arn:aws:iam::account-id:role/role-name) (default:
-                        None)
+  --role ROLE           ARN of the IAM role to deploy the Code Ocean template (e.g., arn:aws:iam::account-id:role/role-name) (default: None)
   --domain DOMAIN       Domain for the deployment (e.g., codeocean.company.com) (default: None)
   --hosted-zone HOSTED_ZONE
                         Hosted zone ID for the deployment (e.g., Z3P5QSUBK4POTI) (default: None)
   --cert CERT           ARN of the SSL/TLS certificate (e.g., arn:aws:acm:region:account:certificate/certificate-id) (default: None)
-  --private-ca          Indicate if the certificate is signed by a private CA (default: False)
+  --private-ca, --no-private-ca
+                        Indicate if the certificate is signed by a private CA (default: False)
   --vpc VPC             ID of the existing VPC (e.g., vpc-0bb1c79de3fd22e7d) (default: None)
-  --internet-facing     Indicate if the deployment is internet-facing (default: True)
+  --internet-facing, --no-internet-facing
+                        Indicate if the deployment is internet-facing (default: True)
 ```
 
 ### Interactive Example

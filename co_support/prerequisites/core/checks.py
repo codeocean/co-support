@@ -1,4 +1,4 @@
-from .constants import get_region
+from .constants import get_region, SKIP_PREREQ
 from .prerequisite import Prerequisite
 from .questions import get_answer, Questions
 from .render import print_summary, print_yaml, print_table
@@ -49,13 +49,13 @@ def check_prerequisites(args):
             parameters={
                 "roles": [
                     "autoscaling.amazonaws.com",
+                    "batch.amazonaws.com",
                     "ecs.amazonaws.com",
+                    "elasticfilesystem.amazonaws.com",
                     "elasticloadbalancing.amazonaws.com",
                     "es.amazonaws.com",
                     "rds.amazonaws.com",
                     "spot.amazonaws.com",
-                    "batch.amazonaws.com",
-                    "elasticfilesystem.amazonaws.com",
                 ]
             },
         ),
@@ -92,7 +92,7 @@ def check_prerequisites(args):
         Prerequisite(
             name="Available EIPs",
             description=(
-                "Checks if there are enough available Elastic IPs and quota."
+                "Checks if the addresses quota for Elastic IPs is sufficient."
             ),
             reference="tinyurl.com/2878e6at",
             function=quota.check_available_eips,
@@ -136,6 +136,7 @@ def check_prerequisites(args):
             function=domain.check_certificate,
             parameters={
                 "cert_arn": get_answer(Questions.CERT_VALIDATION),
+                "hosting_domain": get_answer(Questions.HOSTING_DOMAIN),
                 "private_ca": get_answer(Questions.PRIVATE_CA),
             },
         ),
@@ -148,18 +149,20 @@ def check_prerequisites(args):
 
     for p in prerequisites:
         passed, result = p.check()
-        if result == "":
+        if (passed, result) == SKIP_PREREQ:
             continue
+
         data.append([passed, p.name, p.description, result, p.reference])
         if not passed:
             total_failed += 1
 
-    if args.format == "table":
-        results = print_table(titles, data)
-    elif args.format == "yaml":
-        results = print_yaml(titles, data)
-    else:
-        raise ValueError(f"Unsupported format: {args.format}")
+    match args.format:
+        case "table":
+            results = print_table(titles, data)
+        case "yaml":
+            results = print_yaml(titles, data)
+        case _:
+            raise ValueError(f"Unsupported format: {args.format}")
 
     if args.output:
         path = f"{args.output}/results.{args.format}"
