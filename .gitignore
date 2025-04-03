@@ -1,4 +1,26 @@
-# Byte-compiled / optimized / DLL files
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# Files that might appear on external disks
+.Spotlight-V100
+.Trashes
+
+# Linux system files
+*~
+.nfs*
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Python bytecode
 __pycache__/
 *.py[cod]
 *$py.class

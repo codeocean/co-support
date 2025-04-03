@@ -60,28 +60,31 @@ def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:
 
             True, (
                 f"The private hosted zone {hosted_zone_id} is correctly "
-                "associated with the provided domain or its parent domain."
+                "associated with the provided domain."
             )
     except Exception as e:
         return False, f"Error accessing hosted zone: {str(e)}"
 
     try:
-        answer = dns.resolver.resolve(zone_name, "NS")
-        resolved_ns_records = [rdata.to_text().rstrip('.') for rdata in answer]
-        if not resolved_ns_records:
+        resolved_ns_record = dns.resolver.resolve(zone_name, "NS")
+        resolved_name_servers = [
+            name_server.to_text().rstrip('.')
+            for name_server in resolved_ns_record
+        ]
+        if not resolved_name_servers:
             return False, (
                 f"Delegation is not configured correctly. "
                 f"The NS record for the domain {zone_name} is not resolvable."
             )
-        zone_ns_records = zone_details.get(
+        zone_name_servers = zone_details.get(
             "DelegationSet",
             {},
         ).get("NameServers", [])
 
-        if set(resolved_ns_records) != set(zone_ns_records):
+        if set(resolved_name_servers) != set(zone_name_servers):
             return False, (
-                f"Domain {zone_name} NS records do not match "
-                f"the NS records of the hosted zone {hosted_zone_id}."
+                f"Domain {zone_name} name servers do not match "
+                f"the NS record of the hosted zone {hosted_zone_id}."
             )
     except Exception as e:
         return False, f"Error while resolving NS records: {str(e)}"
@@ -180,7 +183,7 @@ def check_certificate(params: Dict[str, str]) -> Tuple[bool, str]:
             )
 
             if result.returncode != 0:
-                return False, "Certificate chain verification failed."
+                return False, "Certificate verification failed."
         elif not is_private_ca:
             return False, "Missing certificate chain for public certificate."
 

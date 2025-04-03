@@ -144,13 +144,16 @@ def check_dhcp_options(params: Dict[str, str]) -> Tuple[bool, str]:
         vpc = next(
             (vpc for vpc in vpcs if vpc.get("VpcId") == existing_vpc), None
         )
+        if not vpc:
+            return False, (
+                "Specified VPC not found in this account."
+            )
     else:
         vpc = next((vpc for vpc in vpcs if vpc.get("IsDefault")), None)
-
-    if not vpc:
-        return True, (
-            "Test skipped due to not found a default VPC for this account"
-        )
+        if not vpc:
+            return False, (
+                "Test skipped due to not found a default VPC for this account"
+            )
 
     dhcp_option_id = vpc["DhcpOptionsId"]
 
@@ -175,7 +178,7 @@ def check_dhcp_options(params: Dict[str, str]) -> Tuple[bool, str]:
                 else:
                     return False, (
                         f"Default DHCP option set ({dhcp_option_id}) is "
-                        "missing 'AmazonProvidedDNS'. Found: {dns_servers}"
+                        f"missing 'AmazonProvidedDNS'. Found: {dns_servers}"
                     )
 
     return False, (
