@@ -58,7 +58,7 @@ def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:
                     "zone is required for an internet-facing deployment."
                 )
 
-            True, (
+            return True, (
                 f"The private hosted zone {hosted_zone_id} is correctly "
                 "associated with the provided domain."
             )
