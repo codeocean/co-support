@@ -52,7 +52,7 @@ class CheckPrerequisites(BaseCommand):
             help="Domain for the deployment (e.g., codeocean.company.com)",
         )
         self.parser.add_argument(
-            "--hosted-zone",
+            "--zone",
             help="Hosted zone ID for the deployment (e.g., Z3P5QSUBK4POTI)",
         )
         self.parser.add_argument(

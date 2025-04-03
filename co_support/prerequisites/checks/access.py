@@ -30,10 +30,12 @@ def check_linked_roles(params: Dict[str, Set[str]]) -> Tuple[bool, str]:
         return False, f"Error fetching roles: {e}"
 
     missing_roles = roles_set - existing_roles
-    if not missing_roles:
-        return True, "All required service-linked roles exist."
+    if missing_roles:
+        return False, (
+            f"Missing service-linked roles: {', '.join(missing_roles)}."
+        )
 
-    return False, f"Missing service-linked roles: {', '.join(missing_roles)}."
+    return True, "All required service-linked roles exist."
 
 
 def check_admin_access(params: Dict[str, str]) -> Tuple[bool, str]:
@@ -69,8 +71,11 @@ def check_admin_access(params: Dict[str, str]) -> Tuple[bool, str]:
             return True, (
                 f"{role_name} has AdministratorAccess policy attached."
             )
+
         return False, (
-            f"{role_name} does not have AdministratorAccess policy attached."
+            f"{role_name} does not have the AdministratorAccess policy. "
+            "This is acceptable if a least-privileged role is "
+            "intentionally being used."
         )
 
     except ClientError as e:

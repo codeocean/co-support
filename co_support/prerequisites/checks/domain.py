@@ -17,7 +17,7 @@ def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:
     """
     hosted_zone_id = params.get("hosted_zone_id", "")
     hosting_domain = params.get("hosting_domain", "")
-    internet_facing = params.get("internet_facing", False)
+    internet_facing = params.get("internet_facing", True)
 
     if not hosting_domain or not hosted_zone_id:
         return SKIP_PREREQ

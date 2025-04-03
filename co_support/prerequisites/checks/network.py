@@ -11,6 +11,7 @@ def check_existing_vpc(params: Dict[str, str]) -> Tuple[bool, str]:
     and internet access configurations.
     """
     vpc_id = params.get("vpc_id", "")
+    internet_facing = params.get("internet_facing", "")
 
     if not vpc_id:
         return SKIP_PREREQ
@@ -49,7 +50,7 @@ def check_existing_vpc(params: Dict[str, str]) -> Tuple[bool, str]:
             f"Found: {len(private_subnets)}."
         )
 
-    if params.get("internet_facing", ""):
+    if internet_facing:
         if len(public_subnets) < 2:
             return False, (
                 "VPC must have at least 2 public subnets for "
@@ -63,8 +64,14 @@ def check_existing_vpc(params: Dict[str, str]) -> Tuple[bool, str]:
         if cidr_block_range > 24:
             return False, (
                 f"Subnet {subnet['SubnetId']} does not have at least "
-                "256 addresses in its CIDR. Found: {cidr_block}"
+                f"256 addresses in its CIDR - {cidr_block}."
             )
+
+    if not internet_facing:
+        return True, (
+            "VPC has the required subnets. Private Subnets: "
+            f"{len(private_subnets)}."
+        )
 
     try:
         route_table_response = ec2_client.describe_route_tables(
@@ -129,7 +136,7 @@ def check_existing_vpc(params: Dict[str, str]) -> Tuple[bool, str]:
 
 def check_dhcp_options(params: Dict[str, str]) -> Tuple[bool, str]:
     """
-    Checks if the DHCP options set for the VPC is correctly configured.
+    Checks if the DHCP options set is correctly configured.
     """
     ec2_client = boto3.client("ec2")
 

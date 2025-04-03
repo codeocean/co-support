@@ -56,7 +56,7 @@ def ask_questions(args) -> Dict[str, str]:
     _answers[Questions.VERSION.name] = args.version
     _answers[Questions.ROLE_ARN.name] = args.role
     _answers[Questions.HOSTING_DOMAIN.name] = args.domain
-    _answers[Questions.ROUTE53_EXISTING.name] = args.hosted_zone
+    _answers[Questions.ROUTE53_EXISTING.name] = args.zone
     _answers[Questions.CERT_VALIDATION.name] = args.cert
     _answers[Questions.PRIVATE_CA.name] = args.private_ca
     _answers[Questions.EXISTING_VPC.name] = args.vpc
