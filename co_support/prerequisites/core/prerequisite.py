@@ -1,5 +1,7 @@
 from typing import Callable, Dict, Optional
 
+SKIP_PREREQ = (True, "")
+
 
 class Prerequisite:
     """

@@ -2,7 +2,7 @@ from typing import Dict, Tuple
 
 import boto3
 
-from ..core.constants import SKIP_PREREQ
+from co_support.prerequisites.core.prerequisite import SKIP_PREREQ
 
 
 def check_existing_vpc(params: Dict[str, str]) -> Tuple[bool, str]:

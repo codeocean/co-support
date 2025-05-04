@@ -16,5 +16,5 @@ class BaseCommand(ABC):
         self.parser.set_defaults(cmd=self.cmd)
 
     @abstractmethod
-    def cmd(args):
+    def cmd(self, args):
         pass

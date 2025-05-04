@@ -2,7 +2,7 @@
 
 import argparse
 
-from .prerequisites.main import commands as prerequisites_commands
+from co_support.prerequisites.cmd import commands as prerequisites_commands
 
 
 def parse_args():

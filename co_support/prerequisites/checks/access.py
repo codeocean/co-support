@@ -5,8 +5,6 @@ import yaml
 from botocore.exceptions import ClientError
 from typing import Dict, Set, Tuple
 
-from ..core.constants import get_account, get_region
-
 
 def check_linked_roles(params: Dict[str, Set[str]]) -> Tuple[bool, str]:
     """
@@ -18,8 +16,10 @@ def check_linked_roles(params: Dict[str, Set[str]]) -> Tuple[bool, str]:
 
     try:
         for role in iam_client.list_roles()["Roles"]:
-            if not role.get("Path", "").startswith("/aws-service-role/") and \
-               not role.get("AssumeRolePolicyDocument"):
+            if (
+                not role.get("Path", "").startswith("/aws-service-role/")
+                and not role.get("AssumeRolePolicyDocument")
+            ):
                 continue
             statements = role["AssumeRolePolicyDocument"].get("Statement", [])
             for statement in statements:
@@ -87,6 +87,8 @@ def check_shared_ami(params: Dict[str, str]) -> Tuple[bool, str]:
     Checks if the AMI is shared with the current account
     in the specified region.
     """
+    account = params.get("account", "")
+    region = params.get("region", "")
     yaml_url = (
         "https://codeocean-vpc.s3.amazonaws.com/templates/"
         f"{params.get('version', '')}/codeocean.template.yaml"
@@ -95,11 +97,12 @@ def check_shared_ami(params: Dict[str, str]) -> Tuple[bool, str]:
     try:
         yaml_content = yaml.safe_load(requests.get(yaml_url, "").text)
         mappings = yaml_content.get("Mappings", {})
-        ami_id = mappings.get("AMIs", {}).get(get_region(), {}).get("id", "")
+        ami_id = mappings.get(
+            "AMIs", {},
+        ).get(region, {}).get("id", "")
         if not ami_id:
             return False, (
-                f"The current region {get_region()} "
-                "is not supported in this version"
+                f"The current region {region} is not supported in this version"
             )
 
         ec2_client = boto3.client("ec2")
@@ -109,14 +112,14 @@ def check_shared_ami(params: Dict[str, str]) -> Tuple[bool, str]:
             )
             if response.get("Images"):
                 return True, (
-                    f"AMI {ami_id} in region {get_region()} "
-                    f"is shared with account {get_account()}"
+                    f"AMI {ami_id} in region {region} "
+                    f"is shared with account {account}"
                 )
         except ClientError as e:
             return False, f"Error checking AMI permissions: {e}"
 
         return False, (
-            f"AMI {ami_id} is not shared with account {get_account()}"
+            f"AMI {ami_id} is not shared with account {account}"
         )
     except requests.RequestException as e:
         return False, f"Error fetching YAML file: {e}"

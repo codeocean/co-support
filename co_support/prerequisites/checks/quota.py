@@ -2,19 +2,20 @@ from typing import Dict, Tuple
 
 import boto3
 
-from ..core.constants import SKIP_PREREQ, get_region
+from co_support.prerequisites.core.prerequisite import SKIP_PREREQ
 
 
 def check_vcpu_quota(params: Dict[str, int]) -> Tuple[bool, str]:
     """
     Checks if the required vCPUs are available within the quota limits.
     """
+    region = params.get("region")
     required_vcpus = params.get("required_vcpus")
     service_code = params.get("service_code", "ec2")
     quota_code = params.get("quota_code")
 
-    service_quotas = boto3.client("service-quotas", region_name=get_region())
-    ec2_client = boto3.client("ec2", region_name=get_region())
+    service_quotas = boto3.client("service-quotas", region_name=region)
+    ec2_client = boto3.client("ec2", region_name=region)
 
     try:
         quota_response = service_quotas.get_service_quota(
@@ -77,10 +78,11 @@ def check_available_eips(params: Dict[str, int]) -> Tuple[bool, str]:
     if not params.get("internet_facing"):
         return SKIP_PREREQ
 
+    region = params.get("region")
     required_eips = params.get("required_eips")
 
-    ec2_client = boto3.client("ec2", region_name=get_region())
-    sq_client = boto3.client("service-quotas", region_name=get_region())
+    ec2_client = boto3.client("ec2", region_name=region)
+    sq_client = boto3.client("service-quotas", region_name=region)
 
     try:
         eips_response = ec2_client.describe_addresses()
@@ -95,7 +97,7 @@ def check_available_eips(params: Dict[str, int]) -> Tuple[bool, str]:
 
         if remaining_quota < required_eips:
             return False, (
-                f"EIP quota exceeded in {get_region()}: {total_allocated}/"
+                f"EIP quota exceeded in {region}: {total_allocated}/"
                 f"{quota_limit} used, {required_eips} required."
             )
 

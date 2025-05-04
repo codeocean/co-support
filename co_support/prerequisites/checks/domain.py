@@ -7,7 +7,7 @@ from typing import Dict, Tuple
 import boto3
 import dns.resolver
 
-from ..core.constants import SKIP_PREREQ
+from co_support.prerequisites.core.prerequisite import SKIP_PREREQ
 
 
 def check_hosted_zone(params: Dict[str, str]) -> Tuple[bool, str]:

@@ -1,8 +1,19 @@
-from .constants import get_region, SKIP_PREREQ
-from .prerequisite import Prerequisite
-from .questions import get_answer, Questions
-from .render import print_summary, print_yaml, print_table
-from ..checks import access, network, quota, domain
+from co_support.prerequisites.core.prerequisite import (
+    Prerequisite,
+    SKIP_PREREQ
+)
+from co_support.prerequisites.core.questions import QuestionsList
+from co_support.prerequisites.core.render import (
+    print_summary,
+    print_yaml,
+    print_table,
+)
+from co_support.prerequisites.checks import (
+    access,
+    network,
+    quota,
+    domain,
+)
 
 
 def check_prerequisites(args):
@@ -16,7 +27,7 @@ def check_prerequisites(args):
             reference="tinyurl.com/4cp49xmp",
             function=access.check_admin_access,
             parameters={
-                "role_arn": get_answer(Questions.ROLE_ARN),
+                "role_arn": args.answers.get_answer(QuestionsList.ROLE_ARN),
             }
         ),
         Prerequisite(
@@ -27,7 +38,11 @@ def check_prerequisites(args):
             ),
             reference="tinyurl.com/mrusuenn",
             function=access.check_shared_ami,
-            parameters={"version": get_answer(Questions.VERSION)},
+            parameters={
+                "version": args.answers.get_answer(QuestionsList.VERSION),
+                "region": args.region,
+                "account": args.account,
+            },
         ),
         Prerequisite(
             name="DHCP Options",
@@ -37,7 +52,9 @@ def check_prerequisites(args):
             ),
             reference="tinyurl.com/yzxf4yv2",
             function=network.check_dhcp_options,
-            parameters={"vpc_id": get_answer(Questions.EXISTING_VPC)},
+            parameters={"vpc_id": args.answers.get_answer(
+                QuestionsList.EXISTING_VPC
+            )},
         ),
         Prerequisite(
             name="Service Linked Roles",
@@ -71,7 +88,7 @@ def check_prerequisites(args):
                 "quota_code": "L-1216C47A",
                 "service_code": "ec2",
                 "required_vcpus": 34,
-                "region": get_region(),
+                "region": args.region,
             },
         ),
         Prerequisite(
@@ -86,7 +103,7 @@ def check_prerequisites(args):
                 "quota_code": "L-DB2E81BA",
                 "service_code": "ec2",
                 "required_vcpus": 32,
-                "region": get_region(),
+                "region": args.region,
             },
         ),
         Prerequisite(
@@ -97,7 +114,10 @@ def check_prerequisites(args):
             reference="tinyurl.com/2878e6at",
             function=quota.check_available_eips,
             parameters={
-                "internet_facing": get_answer(Questions.INTERNET_FACING),
+                "internet_facing": args.answers.get_answer(
+                    QuestionsList.INTERNET_FACING
+                ),
+                "region": args.region,
                 "required_eips": 2,
             },
         ),
@@ -110,8 +130,10 @@ def check_prerequisites(args):
             reference="tinyurl.com/yzxf4yv2",
             function=network.check_existing_vpc,
             parameters={
-                "vpc_id": get_answer(Questions.EXISTING_VPC),
-                "internet_facing": get_answer(Questions.INTERNET_FACING),
+                "vpc_id": args.answers.get_answer(QuestionsList.EXISTING_VPC),
+                "internet_facing": args.answers.get_answer(
+                    QuestionsList.INTERNET_FACING
+                ),
             },
         ),
         Prerequisite(
@@ -123,8 +145,12 @@ def check_prerequisites(args):
             reference="tinyurl.com/vsnm7avd",
             function=domain.check_hosted_zone,
             parameters={
-                "hosting_domain": get_answer(Questions.HOSTING_DOMAIN),
-                "hosted_zone_id": get_answer(Questions.ROUTE53_EXISTING),
+                "hosting_domain": args.answers.get_answer(
+                    QuestionsList.HOSTING_DOMAIN
+                ),
+                "hosted_zone_id": args.answers.get_answer(
+                    QuestionsList.ROUTE53_EXISTING
+                ),
             },
         ),
         Prerequisite(
@@ -135,9 +161,15 @@ def check_prerequisites(args):
             reference="tinyurl.com/bdfp2a4s",
             function=domain.check_certificate,
             parameters={
-                "cert_arn": get_answer(Questions.CERT_VALIDATION),
-                "hosting_domain": get_answer(Questions.HOSTING_DOMAIN),
-                "private_ca": get_answer(Questions.PRIVATE_CA),
+                "cert_arn": args.answers.get_answer(
+                    QuestionsList.CERT_VALIDATION
+                ),
+                "hosting_domain": args.answers.get_answer(
+                    QuestionsList.HOSTING_DOMAIN
+                ),
+                "private_ca": args.answers.get_answer(
+                    QuestionsList.PRIVATE_CA
+                ),
             },
         ),
     ]

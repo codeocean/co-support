@@ -1,10 +1,10 @@
-import re
-
 from enum import Enum
 from typing import Dict
 
+import re
 
-class Questions(Enum):
+
+class QuestionsList(Enum):
     """
     Enum representing the questions for gathering deployment prerequisites.
     """
@@ -45,68 +45,46 @@ class Questions(Enum):
     )
 
 
-def ask_questions(args) -> Dict[str, str]:
+class Questions:
     """
-    Prompts the user to answer questions interactively
-    or uses provided arguments.
+    Represents the questions for gathering deployment prerequisites.
     """
-    global _answers
 
-    _answers = {}
-    _answers[Questions.VERSION.name] = args.version
-    _answers[Questions.ROLE_ARN.name] = args.role
-    _answers[Questions.HOSTING_DOMAIN.name] = args.domain
-    _answers[Questions.ROUTE53_EXISTING.name] = args.zone
-    _answers[Questions.CERT_VALIDATION.name] = args.cert
-    _answers[Questions.PRIVATE_CA.name] = args.private_ca
-    _answers[Questions.EXISTING_VPC.name] = args.vpc
-    _answers[Questions.INTERNET_FACING.name] = args.internet_facing
-
-    if args.silent:
-        if not args.version:
-            raise ValueError("Version must be provided in silent mode.")
-        return _answers
-
-    def default_value(question: str) -> str:
+    def ask(self, skipped_questions) -> Dict[str, str]:
         """
-        Extracts the default value from a question string.
+        Prompts the user to answer questions interactively
+        or uses provided arguments.
         """
-        matches = re.findall(r"\[([yn])/([yn])\]", question, re.IGNORECASE)
-        for match in matches:
-            return match[1]
+        def default_value(question: str) -> str:
+            """
+            Extracts the default value from a question string.
+            """
+            matches = re.findall(r"\[([yn])/([yn])\]", question, re.IGNORECASE)
+            for match in matches:
+                return match[1]
 
-    for question in Questions:
-        if _answers.get(question.name):
-            continue
+        user_answers = {}
 
-        q = question.value.split("|")
-        response = ""
-        while not response.strip():
-            response = input(q[0] + " ").strip()
+        for question in QuestionsList:
+            if skipped_questions.get(question.name):
+                continue
+
+            q = question.value.split("|")
+            response = ""
+            while not response.strip():
+                response = input(q[0] + " ").strip()
+                if (
+                    response.lower() == default_value(q[0])
+                    and len(q) > 1
+                ):
+                    response = input(q[1] + " ").strip()
+
+            user_answers[question.name] = response
+
             if (
-                response.lower() == default_value(q[0])
-                and len(q) > 1
+                question == QuestionsList.INTRODUCTION
+                and response.lower() == "n"
             ):
-                response = input(q[1] + " ").strip()
+                break
 
-        _answers[question.name] = response
-
-        if question == Questions.INTRODUCTION and response.lower() == "n":
-            break
-
-    return _answers
-
-
-def get_answer(question: Enum) -> str:
-    """
-    Retrieves the answer to a specific question.
-    """
-    global _answers
-    if _answers is None:
-        raise ValueError("Answers have not been initialized.")
-
-    answer = _answers.get(question.name, "")
-    if isinstance(answer, str) and answer.lower() in ["y", "n"]:
-        answer = answer.lower() == "y"
-
-    return answer
+        return user_answers

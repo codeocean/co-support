@@ -1,8 +1,10 @@
 from argparse import _SubParsersAction, BooleanOptionalAction
 
-from .core.questions import ask_questions
-from .core.checks import check_prerequisites
-from ..cmd import BaseCommand
+from co_support.prerequisites.core.questions import Questions
+from co_support.prerequisites.core.answers import Answers
+from co_support.prerequisites.core.checks import check_prerequisites
+from co_support.prerequisites.core.environment import Environment
+from co_support.cmd import BaseCommand
 
 
 def commands(subparsers: _SubParsersAction) -> None:
@@ -84,7 +86,10 @@ class CheckPrerequisites(BaseCommand):
         Executes the 'check-prerequisites' command.
         """
         try:
-            ask_questions(args)
+            Environment(args)
+            questions = Questions()
+            args.answers = Answers(questions, args)
+
             check_prerequisites(args)
         except Exception as e:
             print(f"Error: {e}")

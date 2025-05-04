@@ -142,3 +142,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Hatchling build artifacts
+*.dist-info/
+*.egg-info/
