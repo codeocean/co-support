@@ -1,90 +1,107 @@
-from enum import Enum
-from typing import Dict
-
-import re
+from typing import Dict, List
 
 
-class QuestionsList(Enum):
-    """
-    Enum representing the questions for gathering deployment prerequisites.
-    """
-    VERSION = (
-        "Which version of Code Ocean do you intend to deploy (e.g., v3.4.1)?\n"
-    )
-    INTRODUCTION = (
-        "Would you like to answer a few questions? We can proceed without them"
-        ", but the results may be incomplete.\n[y/n]:"
-    )
-    ROLE_ARN = (
-        "Will the Code Ocean template be deployed using the current user?"
-        "\n[y/n]:"
-        "|Please provide the ARN of the IAM role to be used for deployment:\n"
-    )
-    HOSTING_DOMAIN = (
-        "What is your company's desired hosting domain? (Format: "
-        "codeocean.[COMPANYNAME].com):\n"
-    )
-    ROUTE53_EXISTING = (
-        "Are you using an existing Route 53 hosted zone in this AWS account?"
-        "\n[n/y]:"
-        "|Please provide the hosted zone ID:\n"
-    )
-    CERT_VALIDATION = (
-        "Has your SSL/TLS certificate been validated?\n[n/y]:"
-        "|Please provide the certificate ARN:\n"
-    )
-    PRIVATE_CA = (
-        "Is this certificate signed by a private CA?\n[n/y]:"
-    )
-    EXISTING_VPC = (
-        "Are you deploying Code Ocean to an existing VPC?\n[n/y]:"
-        "|Please provide the VPC ID:\n"
-    )
-    INTERNET_FACING = (
-        "Will your deployment be internet-facing?\n[y/n]:"
-    )
+class Question:
+    def __init__(self, text, property, args, type="str"):
+        self.text = text
+        self.property = property
+        self.response = None
+        self.type = type
+        self.args = args
+
+    def ask(self) -> str:
+        """
+        Prompt the user for this question and return their response.
+        """
+        if vars(self.args).get(self.property):
+            self.response = vars(self.args).get(self.property)
+            return
+
+        response = ""
+        match self.type:
+            case "str":
+                while not response.strip():
+                    response = input(f"{self.text}\n> ")
+            case "bool":
+                while not response.lower() in ["y", "n"]:
+                    response = input(f"{self.text}\n[y/n]> ")
+                response = response.lower() == "y"
+            case _:
+                print("Unknown command.")
+                raise ValueError("Invalid type. Supported types: str, bool.")
+
+        self.response = response
+
+    def answer(self) -> Dict[str, str]:
+        """
+        Return the answer to this question.
+        """
+        return {self.property: self.response}
+
+
+class YesNoQuestion(Question):
+    def __init__(
+        self,
+        text,
+        args,
+        property=None,
+        type="bool",
+        yes_question_list: List[Question] = [],
+        no_question_list: List[Question] = [],
+    ):
+        self.yes_question_list = yes_question_list
+        self.no_question_list = no_question_list
+        super().__init__(text, property, args, type)
+
+    def ask(self) -> str:
+        """
+        Prompt the user for this question and return their response.
+        """
+        if self.property and self.args[self.property]:
+            self.response = self.args[self.property]
+            return
+
+        response = ""
+        while not response.lower() in ["y", "n"]:
+            response = input(f"{self.text}\n[y/n]> ")
+
+        if self.property:
+            self.response = response.lower() == "y"
+
+        if response.lower() == "y":
+            for question in self.yes_question_list:
+                question.ask()
+        elif response.lower() == "n":
+            for question in self.no_question_list:
+                question.ask()
+        else:
+            raise ValueError("Invalid response. Please answer 'y' or 'n'.")
+
+    def answer(self) -> str:
+        """
+        Return answers from the subsequent questions.
+        """
+        answers = {}
+        if self.property:
+            answers[self.property] = self.response
+
+        for question in self.yes_question_list + self.no_question_list:
+            answers.update(question.answer())
+
+        return answers
 
 
 class Questions:
-    """
-    Represents the questions for gathering deployment prerequisites.
-    """
+    def __init__(self, list: List[Question]):
+        self.list = list
 
-    def ask(self, skipped_questions) -> Dict[str, str]:
-        """
-        Prompts the user to answer questions interactively
-        or uses provided arguments.
-        """
-        def default_value(question: str) -> str:
-            """
-            Extracts the default value from a question string.
-            """
-            matches = re.findall(r"\[([yn])/([yn])\]", question, re.IGNORECASE)
-            for match in matches:
-                return match[1]
+    def ask(self):
+        for question in self.list:
+            question.ask()
 
-        user_answers = {}
+    def answers(self):
+        answers = {}
+        for question in self.list:
+            answers.update(question.answer())
 
-        for question in QuestionsList:
-            if skipped_questions.get(question.name):
-                continue
-
-            q = question.value.split("|")
-            response = ""
-            while not response.strip():
-                response = input(q[0] + " ").strip()
-                if (
-                    response.lower() == default_value(q[0])
-                    and len(q) > 1
-                ):
-                    response = input(q[1] + " ").strip()
-
-            user_answers[question.name] = response
-
-            if (
-                question == QuestionsList.INTRODUCTION
-                and response.lower() == "n"
-            ):
-                break
-
-        return user_answers
+        return answers

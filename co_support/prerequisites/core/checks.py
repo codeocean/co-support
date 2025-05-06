@@ -2,7 +2,6 @@ from co_support.prerequisites.core.prerequisite import (
     Prerequisite,
     SKIP_PREREQ
 )
-from co_support.prerequisites.core.questions import QuestionsList
 from co_support.prerequisites.core.render import (
     print_summary,
     print_yaml,
@@ -27,7 +26,7 @@ def check_prerequisites(args):
             reference="tinyurl.com/4cp49xmp",
             function=access.check_admin_access,
             parameters={
-                "role_arn": args.answers.get_answer(QuestionsList.ROLE_ARN),
+                "role_arn": args.answers.retrieve("role"),
             }
         ),
         Prerequisite(
@@ -39,7 +38,7 @@ def check_prerequisites(args):
             reference="tinyurl.com/mrusuenn",
             function=access.check_shared_ami,
             parameters={
-                "version": args.answers.get_answer(QuestionsList.VERSION),
+                "version": args.answers.retrieve("version"),
                 "region": args.region,
                 "account": args.account,
             },
@@ -52,9 +51,7 @@ def check_prerequisites(args):
             ),
             reference="tinyurl.com/yzxf4yv2",
             function=network.check_dhcp_options,
-            parameters={"vpc_id": args.answers.get_answer(
-                QuestionsList.EXISTING_VPC
-            )},
+            parameters={"vpc_id": args.answers.retrieve("existing_vpc")},
         ),
         Prerequisite(
             name="Service Linked Roles",
@@ -106,6 +103,7 @@ def check_prerequisites(args):
                 "region": args.region,
             },
         ),
+        # CE quota check
         Prerequisite(
             name="Available EIPs",
             description=(
@@ -114,9 +112,7 @@ def check_prerequisites(args):
             reference="tinyurl.com/2878e6at",
             function=quota.check_available_eips,
             parameters={
-                "internet_facing": args.answers.get_answer(
-                    QuestionsList.INTERNET_FACING
-                ),
+                "internet_facing": args.answers.retrieve("internet_facing"),
                 "region": args.region,
                 "required_eips": 2,
             },
@@ -130,10 +126,8 @@ def check_prerequisites(args):
             reference="tinyurl.com/yzxf4yv2",
             function=network.check_existing_vpc,
             parameters={
-                "vpc_id": args.answers.get_answer(QuestionsList.EXISTING_VPC),
-                "internet_facing": args.answers.get_answer(
-                    QuestionsList.INTERNET_FACING
-                ),
+                "vpc_id": args.answers.retrieve("vpc"),
+                "internet_facing": args.answers.retrieve("internet_facing"),
             },
         ),
         Prerequisite(
@@ -145,12 +139,8 @@ def check_prerequisites(args):
             reference="tinyurl.com/vsnm7avd",
             function=domain.check_hosted_zone,
             parameters={
-                "hosting_domain": args.answers.get_answer(
-                    QuestionsList.HOSTING_DOMAIN
-                ),
-                "hosted_zone_id": args.answers.get_answer(
-                    QuestionsList.ROUTE53_EXISTING
-                ),
+                "hosting_domain": args.answers.retrieve("domain"),
+                "hosted_zone_id": args.answers.retrieve("zone"),
             },
         ),
         Prerequisite(
@@ -161,15 +151,9 @@ def check_prerequisites(args):
             reference="tinyurl.com/bdfp2a4s",
             function=domain.check_certificate,
             parameters={
-                "cert_arn": args.answers.get_answer(
-                    QuestionsList.CERT_VALIDATION
-                ),
-                "hosting_domain": args.answers.get_answer(
-                    QuestionsList.HOSTING_DOMAIN
-                ),
-                "private_ca": args.answers.get_answer(
-                    QuestionsList.PRIVATE_CA
-                ),
+                "cert_arn": args.answers.retrieve("cert"),
+                "hosting_domain": args.answers.retrieve("domain"),
+                "private_ca": args.answers.retrieve("private_ca"),
             },
         ),
     ]
