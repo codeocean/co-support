@@ -89,15 +89,19 @@ class CheckPrerequisites(BaseCommand):
         questions = Questions(
             [
                 Question(
-                    text="Which version of Code Ocean do you intend to deploy (e.g., v3.4.1)?", # noqa
+                    text="Which version of Code Ocean do you intend to deploy?", # noqa
+                    comment="e.g., v3.4.1",
                     property="version",
                     args=args,
                 ),
                 YesNoQuestion(
-                    text="Would you like to answer a few questions? We can proceed without them, but the results may be incomplete.", # noqa
+                    text="Would you like to answer a few questions?",
+                    comment="This will help us determine the prerequisites for your deployment.", # noqa
+                    args=args,
                     yes_question_list=[
                         YesNoQuestion(
                             text="Will the Code Ocean template be deployed using the current user?", # noqa
+                            args=args,
                             no_question_list=[
                                 Question(
                                     text="Please provide the ARN of the IAM role to be used for deployment:", # noqa
@@ -105,15 +109,16 @@ class CheckPrerequisites(BaseCommand):
                                     args=args,
                                 )
                             ],
-                            args=args,
                         ),
                         Question(
-                            text="What is your company's desired hosting domain? (Format: codeocean.[COMPANYNAME].com):", # noqa
+                            text="What is your company's desired hosting domain?", # noqa
+                            comment="e.g., codeocean.company.com",
                             property="domain",
                             args=args,
                         ),
                         YesNoQuestion(
                             text="Are you using an existing Route 53 hosted zone in this AWS account?", # noqa
+                            args=args,
                             yes_question_list=[
                                 Question(
                                     text="Please provide the hosted zone ID:",
@@ -121,26 +126,26 @@ class CheckPrerequisites(BaseCommand):
                                     args=args,
                                 )
                             ],
-                            args=args,
                         ),
                         YesNoQuestion(
                             text="Has your SSL/TLS certificate been validated?", # noqa
+                            args=args,
                             yes_question_list=[
+                                YesNoQuestion(
+                                    text="Is this certificate signed by a private CA?", # noqa
+                                    property="private_ca",
+                                    args=args,
+                                ),
                                 Question(
                                     text="Please provide the certificate ARN:",
                                     property="cert",
                                     args=args,
-                                )
+                                ),
                             ],
-                            args=args,
-                        ),
-                        YesNoQuestion(
-                            text="Is this certificate signed by a private CA?",
-                            property="private_ca",
-                            args=args,
                         ),
                         YesNoQuestion(
                             text="Are you deploying Code Ocean to an existing VPC?", # noqa
+                            args=args,
                             yes_question_list=[
                                 Question(
                                     text="Please provide the VPC ID:",
@@ -148,7 +153,6 @@ class CheckPrerequisites(BaseCommand):
                                     args=args,
                                 )
                             ],
-                            args=args,
                         ),
                         YesNoQuestion(
                             text="Will your deployment be internet-facing?",
@@ -156,7 +160,6 @@ class CheckPrerequisites(BaseCommand):
                             args=args,
                         )
                     ],
-                    args=args,
                 )
             ],
             args,

@@ -2,8 +2,9 @@ from typing import Dict, List
 
 
 class Question:
-    def __init__(self, text, property, args, type="str"):
-        self.text = text
+    def __init__(self, text, property, args, type="str", comment=None):
+        self.text = f"\033[1m{text}\033[0m"
+        self.comment = f"\033[3m\033[90m{comment}\033[0m\n" if comment else ""
         self.property = property
         self.response = None
         self.type = type
@@ -21,10 +22,10 @@ class Question:
         match self.type:
             case "str":
                 while not response.strip():
-                    response = input(f"{self.text}\n> ")
+                    response = input(f"{self.text}\n{self.comment}> ")
             case "bool":
                 while not response.lower() in ["y", "n"]:
-                    response = input(f"{self.text}\n[y/n]> ")
+                    response = input(f"{self.text}\n{self.comment}[y/n]> ")
                 response = response.lower() == "y"
             case _:
                 print("Unknown command.")
@@ -44,27 +45,28 @@ class YesNoQuestion(Question):
         self,
         text,
         args,
+        comment=None,
         property=None,
         type="bool",
         yes_question_list: List[Question] = [],
         no_question_list: List[Question] = [],
     ):
-        self.response = None
         self.yes_question_list = yes_question_list
         self.no_question_list = no_question_list
-        super().__init__(text, property, args, type)
+        super().__init__(text, property, args, type, comment)
 
     def ask(self) -> str:
         """
         Prompt the user for this question and return their response.
         """
-        if self.property and self.args[self.property]:
-            self.response = self.args[self.property]
+
+        if vars(self.args).get(self.property):
+            self.response = vars(self.args).get(self.property)
             return
 
         response = ""
         while not response.lower() in ["y", "n"]:
-            response = input(f"{self.text}\n[y/n]> ")
+            response = input(f"{self.text}\n{self.comment}[y/n]> ")
 
         if self.property:
             self.response = response.lower() == "y"
