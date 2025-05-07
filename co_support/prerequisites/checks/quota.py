@@ -109,3 +109,50 @@ def check_available_eips(params: Dict[str, int]) -> Tuple[bool, str]:
 
     except Exception as e:
         return False, f"Error checking Elastic IPs or quota: {str(e)}"
+
+
+def check_available_ces(params: Dict[str, int]) -> Tuple[bool, str]:
+    """
+    Checks if the required Compute Environments (CEs) are available
+    within the quota limits.
+    """
+    region = params.get("region")
+    required_ces = params.get("required_ces")
+
+    sq_client = boto3.client("service-quotas", region_name=region)
+
+    try:
+        quota_response = sq_client.get_service_quota(
+            ServiceCode="batch",
+            QuotaCode="L-144F0CA5",
+        )
+        quota_limit = int(quota_response["Quota"]["Value"])
+
+        client = boto3.client('batch', region_name=region)
+        total_ces = len(
+            client.describe_compute_environments().get("computeEnvironments")
+        )
+
+        if quota_limit < required_ces + total_ces:
+            msg = (
+                f"Quota limit for Compute Environments exceeded in {region}: "
+                f"{total_ces} CEs already exist, "
+                f"{required_ces} required."
+            )
+
+            if quota_limit == 50:
+                msg += (
+                    " 50 is the macximum number of CEs allowed per region. "
+                    "Please delete some CEs to proceed."
+                )
+
+            return False, (msg)
+
+        return True, (
+            f"{quota_limit - total_ces} CEs are available out of a total "
+            f"quota of {quota_limit}, meeting the requirement "
+            f"of {required_ces}."
+        )
+
+    except Exception as e:
+        return False, f"Error checking Compute Environments or quota: {str(e)}"

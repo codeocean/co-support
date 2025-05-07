@@ -49,6 +49,7 @@ class YesNoQuestion(Question):
         yes_question_list: List[Question] = [],
         no_question_list: List[Question] = [],
     ):
+        self.response = None
         self.yes_question_list = yes_question_list
         self.no_question_list = no_question_list
         super().__init__(text, property, args, type)
@@ -92,12 +93,14 @@ class YesNoQuestion(Question):
 
 
 class Questions:
-    def __init__(self, list: List[Question]):
+    def __init__(self, list: List[Question], args):
         self.list = list
+        self.silent = args.silent
 
     def ask(self):
-        for question in self.list:
-            question.ask()
+        if not self.silent:
+            for question in self.list:
+                question.ask()
 
     def answers(self):
         answers = {}
