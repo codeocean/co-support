@@ -39,8 +39,8 @@ def check_prerequisites(answers, args):
             function=access.check_shared_ami,
             parameters={
                 "version": answers.retrieve("version"),
-                "region": args.region,
-                "account": args.account,
+                "region": args.env["region"],
+                "account": args.env["account"],
             },
         ),
         Prerequisite(
@@ -85,7 +85,7 @@ def check_prerequisites(answers, args):
                 "quota_code": "L-1216C47A",
                 "service_code": "ec2",
                 "required_vcpus": 34,
-                "region": args.region,
+                "region": args.env["region"],
             },
         ),
         Prerequisite(
@@ -100,7 +100,7 @@ def check_prerequisites(answers, args):
                 "quota_code": "L-DB2E81BA",
                 "service_code": "ec2",
                 "required_vcpus": 32,
-                "region": args.region,
+                "region": args.env["region"],
             },
         ),
         Prerequisite(
@@ -112,7 +112,7 @@ def check_prerequisites(answers, args):
             function=quota.check_available_eips,
             parameters={
                 "internet_facing": answers.retrieve("internet_facing"),
-                "region": args.region,
+                "region": args.env["region"],
                 "required_eips": 2,
             },
         ),
@@ -125,7 +125,7 @@ def check_prerequisites(answers, args):
             reference="tinyurl.com/3hbyk5m5",
             function=quota.check_available_ces,
             parameters={
-                "region": args.region,
+                "region": args.env["region"],
                 "required_ces": 5,
             },
         ),

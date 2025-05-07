@@ -52,6 +52,13 @@ def check_admin_access(params: Dict[str, str]) -> Tuple[bool, str]:
             role_arn = sts_client.get_caller_identity()["Arn"]
 
         role_name = role_arn.split("/")[-1]
+
+        if role_name == "CodeOceanLeastPrivilegedDeployRole":
+            return True, (
+                "The CodeOceanLeastPrivilegedDeployRole role should have the "
+                "necessary permissions to deploy the Code Ocean template."
+            )
+
         if ":assumed-role/" in role_arn:
             role_name = role_arn.split("/")[-2]
 
@@ -121,5 +128,5 @@ def check_shared_ami(params: Dict[str, str]) -> Tuple[bool, str]:
         return False, (
             f"AMI {ami_id} is not shared with account {account}"
         )
-    except requests.RequestException as e:
+    except Exception as e:
         return False, f"Error fetching YAML file: {e}"

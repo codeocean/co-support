@@ -85,7 +85,9 @@ class CheckPrerequisites(BaseCommand):
         """
         Executes the 'check-prerequisites' command.
         """
-        Environment(args)
+        env = Environment()
+        args.env = env.variables
+
         questions = Questions(
             [
                 Question(
@@ -101,6 +103,7 @@ class CheckPrerequisites(BaseCommand):
                     yes_question_list=[
                         YesNoQuestion(
                             text="Will the Code Ocean template be deployed using the current user?", # noqa
+                            comment=args.env["role"],
                             args=args,
                             no_question_list=[
                                 Question(

@@ -3,23 +3,14 @@ import boto3
 
 class Environment:
     """
-    R
+    This class is used to get the environment information for
+    the current AWS session.
     """
     def __init__(
         self,
-        args,
     ) -> None:
-        args.region = self.get_region()
-        args.account = self.get_account()
-
-    def get_region(self) -> str:
-        """
-        Retrieves the AWS region for the current session.
-        """
-        return boto3.session.Session().region_name
-
-    def get_account(self) -> str:
-        """
-        Retrieves the AWS account ID for the current session.
-        """
-        return boto3.client("sts").get_caller_identity()["Account"]
+        self.variables = {
+            "region": boto3.session.Session().region_name,
+            "account": boto3.client("sts").get_caller_identity()["Account"],
+            "role": boto3.client("sts").get_caller_identity()["Arn"],
+        }
