@@ -116,7 +116,7 @@ class OnDemandGandVTInstancesQuotaCheck(VcpuQuotaCheck):
         region: str,
     ) -> None:
         super().__init__(
-            name="On-Demand G and VT Instancess",
+            name="On-Demand G and VT Instances",
             description=(
                 "Checks if the vCPU quota for On-Demand G and VT "
                 "instances is sufficient."

@@ -130,7 +130,7 @@ class AdminAccessCheck(Prerequisite):
             return False, f"Error checking admin access: {e}"
 
 
-class SharedAimiCheck(Prerequisite):
+class SharedAmiCheck(Prerequisite):
     def __init__(
         self,
         version: str,

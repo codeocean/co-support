@@ -19,7 +19,7 @@ def check_prerequisites(answers, args):
         access.AdminAccessCheck(
             role_arn=answers.retrieve("role"),
         ),
-        access.SharedAimiCheck(
+        access.SharedAmiCheck(
             version=answers.retrieve("version"),
             region=args.env.region,
             account=args.env.account,
@@ -32,7 +32,7 @@ def check_prerequisites(answers, args):
             vpc_id=answers.retrieve("vpc"),
             internet_facing=answers.retrieve("internet_facing"),
         ),
-        quota.OnDemandGandVTInstancesQuotaCheck(
+        quota.OnDemandStandardVcpuQuotaCheck(
             region=args.env.region,
         ),
         quota.OnDemandGandVTInstancesQuotaCheck(
