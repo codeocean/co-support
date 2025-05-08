@@ -9,8 +9,6 @@ class Environment:
     def __init__(
         self,
     ) -> None:
-        self.variables = {
-            "region": boto3.session.Session().region_name,
-            "account": boto3.client("sts").get_caller_identity()["Account"],
-            "role": boto3.client("sts").get_caller_identity()["Arn"],
-        }
+        self.region = boto3.session.Session().region_name
+        self.account = boto3.client("sts").get_caller_identity()["Account"]
+        self.role = boto3.client("sts").get_caller_identity()["Arn"]

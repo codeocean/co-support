@@ -1,9 +1,10 @@
-from typing import Callable, Dict, Optional
+from abc import ABC, abstractmethod
+from typing import Dict
 
 SKIP_PREREQ = (True, "")
 
 
-class Prerequisite:
+class Prerequisite(ABC):
     """
     Represents a prerequisite check with its associated metadata and logic.
     """
@@ -13,17 +14,14 @@ class Prerequisite:
         name: str,
         description: str,
         reference: str,
-        function: Callable[..., Dict],
-        parameters: Optional[Dict] = None,
     ) -> None:
         self.name: str = name
         self.description: str = description
         self.reference: str = reference
-        self.function: Callable[..., Dict] = function
-        self.parameters: Optional[Dict] = parameters
 
+    @abstractmethod
     def check(self) -> Dict:
         """
         Executes the prerequisite check function.
         """
-        return self.function(self.parameters)
+        pass

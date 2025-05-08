@@ -1,6 +1,10 @@
 from argparse import _SubParsersAction, BooleanOptionalAction
 
-from co_support.prerequisites.core.questions import Questions, Question, YesNoQuestion
+from co_support.prerequisites.core.questions import (
+    Questions,
+    Question,
+    YesNoQuestion,
+)
 from co_support.prerequisites.core.answers import Answers
 from co_support.prerequisites.core.checks import check_prerequisites
 from co_support.prerequisites.core.environment import Environment
@@ -85,9 +89,7 @@ class CheckPrerequisites(BaseCommand):
         """
         Executes the 'check-prerequisites' command.
         """
-        env = Environment()
-        args.env = env.variables
-
+        args.env = Environment()
         questions = Questions(
             [
                 Question(
@@ -103,7 +105,7 @@ class CheckPrerequisites(BaseCommand):
                     yes_question_list=[
                         YesNoQuestion(
                             text="Will the Code Ocean template be deployed using the current user?", # noqa
-                            comment=args.env["role"],
+                            comment=args.env.role,
                             args=args,
                             no_question_list=[
                                 Question(
