@@ -26,6 +26,7 @@ class Question:
             case "bool":
                 while not response.lower() in ["y", "n"]:
                     response = input(f"{self.text}\n{self.comment}[y/n]> ")
+
                 response = response.lower() == "y"
             case _:
                 print("Unknown command.")
@@ -59,22 +60,12 @@ class YesNoQuestion(Question):
         """
         Prompt the user for this question and return their response.
         """
+        super().ask()
 
-        if vars(self.args).get(self.property):
-            self.response = vars(self.args).get(self.property)
-            return
-
-        response = ""
-        while not response.lower() in ["y", "n"]:
-            response = input(f"{self.text}\n{self.comment}[y/n]> ")
-
-        if self.property:
-            self.response = response.lower() == "y"
-
-        if response.lower() == "y":
+        if self.response is True:
             for question in self.yes_question_list:
                 question.ask()
-        elif response.lower() == "n":
+        elif self.response is False:
             for question in self.no_question_list:
                 question.ask()
         else:

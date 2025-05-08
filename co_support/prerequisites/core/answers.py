@@ -12,9 +12,9 @@ class Answers:
     ) -> None:
         questions.ask()
         self.answers = questions.answers()
-        for key in self.answers:
-            if not self.answers[key]:
-                self.answers[key] = vars(args).get(key)
+        for answer in self.answers:
+            if not self.answers[answer]:
+                self.answers[answer] = vars(args).get(answer)
 
         if args.silent:
             if not args.version:
