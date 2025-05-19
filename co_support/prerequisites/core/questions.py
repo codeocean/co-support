@@ -10,7 +10,7 @@ class Question:
         self.type = type
         self.args = args
 
-    def ask(self) -> str:
+    def ask(self):
         """
         Prompt the user for this question and return their response.
         """
@@ -56,7 +56,7 @@ class YesNoQuestion(Question):
         self.no_question_list = no_question_list
         super().__init__(text, property, args, type, comment)
 
-    def ask(self) -> str:
+    def ask(self):
         """
         Prompt the user for this question and return their response.
         """
@@ -71,7 +71,7 @@ class YesNoQuestion(Question):
         else:
             raise ValueError("Invalid response. Please answer 'y' or 'n'.")
 
-    def answer(self) -> str:
+    def answer(self) -> Dict[str, str]:
         """
         Return answers from the subsequent questions.
         """
@@ -86,18 +86,18 @@ class YesNoQuestion(Question):
 
 
 class Questions:
-    def __init__(self, list: List[Question], args):
-        self.list = list
+    def __init__(self, questions: List[Question], args):
+        self.questions = questions
         self.silent = args.silent
 
     def ask(self):
         if not self.silent:
-            for question in self.list:
+            for question in self.questions:
                 question.ask()
 
-    def answers(self):
+    def answers(self) -> Dict[str, str]:
         answers = {}
-        for question in self.list:
+        for question in self.questions:
             answers.update(question.answer())
 
         return answers

@@ -222,14 +222,15 @@ class AvailableCEsCheck(Prerequisite):
 
             if quota_limit < self.required_ces + total_ces:
                 msg = (
-                    f"Quota limit for Compute Environments exceeded in "
-                    f"{self.region}: {total_ces} CEs already exist, "
-                    f"{self.required_ces} required."
+                    f"The current quota limit for Compute Environments of "
+                    f"{quota_limit} is insufficient in {self.region}: "
+                    f"{total_ces} CEs already exist, {self.required_ces} "
+                    "required."
                 )
 
                 if quota_limit == 50:
                     msg += (
-                        " 50 is the macximum number of CEs allowed per "
+                        " 50 is the maximum number of CEs allowed per "
                         "region. Please delete some CEs to proceed."
                     )
 

@@ -104,7 +104,7 @@ class CheckPrerequisites(BaseCommand):
                     args=args,
                     yes_question_list=[
                         YesNoQuestion(
-                            text="Will the Code Ocean template be deployed using the current user?", # noqa
+                            text="Will the Code Ocean template be deployed using the current IAM identity (user/role)?", # noqa
                             comment=args.env.role,
                             args=args,
                             no_question_list=[
@@ -170,5 +170,6 @@ class CheckPrerequisites(BaseCommand):
             args,
         )
 
-        answers = Answers(questions, args)
+        questions.ask()
+        answers = Answers(questions.answers(), args)
         check_prerequisites(answers, args)

@@ -1,4 +1,4 @@
-from co_support.prerequisites.core.questions import Questions
+from typing import Dict
 
 
 class Answers:
@@ -7,14 +7,10 @@ class Answers:
     """
     def __init__(
         self,
-        questions: Questions,
+        answers: Dict[str, str],
         args,
     ) -> None:
-        questions.ask()
-        self.answers = questions.answers()
-        for answer in self.answers:
-            if not self.answers[answer]:
-                self.answers[answer] = vars(args).get(answer)
+        self.answers = answers
 
         if args.silent:
             if not args.version:
