@@ -15,7 +15,7 @@ class ExistingVpcCheck(Prerequisite):
         internet_facing: bool
     ) -> None:
         super().__init__(
-            name="DHCP Options",
+            name="Existing VPC",
             description=(
                 "Validates the existing VPC for required subnets and "
                 "internet access configurations."

@@ -26,6 +26,9 @@ dependencies = [
     "dnspython",
 ]
 
+[project.scripts]
+co-support = "co_support.main:main"
+
 [project.optional-dependencies]
 dev = ["pytest", "flake8", "hatch"]
 
