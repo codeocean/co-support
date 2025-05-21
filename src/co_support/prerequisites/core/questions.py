@@ -22,18 +22,17 @@ class Question:
             return
 
         response = ""
-        match self.type:
-            case "str":
-                while not response.strip():
-                    response = input(f"{self.text}\n{self.comment}> ")
-            case "bool":
-                while not response.lower() in ["y", "n"]:
-                    response = input(f"{self.text}\n{self.comment}[y/n]> ")
+        if self.type == "str":
+            while not response.strip():
+                response = input(f"{self.text}\n{self.comment}> ")
+        elif self.type == "bool":
+            while not response.lower() in ["y", "n"]:
+                response = input(f"{self.text}\n{self.comment}[y/n]> ")
 
-                response = response.lower() == "y"
-            case _:
-                print("Unknown command.")
-                raise ValueError("Invalid type. Supported types: str, bool.")
+            response = response.lower() == "y"
+        else:
+            print("Unknown command.")
+            raise ValueError("Invalid type. Supported types: str, bool.")
 
         self.response = response
 

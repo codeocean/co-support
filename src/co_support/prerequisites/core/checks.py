@@ -71,13 +71,12 @@ def check_prerequisites(answers, args):
         if not passed:
             total_failed += 1
 
-    match args.format:
-        case "table":
-            results = print_table(titles, data)
-        case "yaml":
-            results = print_yaml(titles, data)
-        case _:
-            raise ValueError(f"Unsupported format: {args.format}")
+    if args.format == "table":
+        results = print_table(titles, data)
+    elif args.format == "yaml":
+        results = print_yaml(titles, data)
+    else:
+        raise ValueError(f"Unsupported format: {args.format}")
 
     if args.output:
         path = f"{args.output}/results.{args.format}"
