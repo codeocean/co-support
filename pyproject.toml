@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "co-support"
+version = "0.1.0"
+authors = [
+  { name="Code Ocean", email="dev@codeocean.com" },
+]
+description = "A tool for managing prerequisites for Code Ocean deployment."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "argparse",
+    "boto3",
+    "requests",
+    "PyYAML",
+    "prettytable",
+    "colorama",
+    "dnspython",
+]
+
+[project.scripts]
+co-support = "co_support.main:main"
+
+[project.optional-dependencies]
+dev = ["pytest", "flake8", "hatch"]
+
+[project.urls]
+Homepage = "https://github.com/codeocean/co-support"
+Issues = "https://github.com/codeocean/co-support/issues"
+Changelog = "https://github.com/codeocean/co-support/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/co_support"]
+
+[tool.hatch.envs.default.scripts]
+lint = "flake8 src tests"
+test = "pytest"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.8", "3.9", "3.10", "3.11"]
