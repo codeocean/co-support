@@ -5,7 +5,7 @@
 ### pip
 To install or upgrade the co-support, run the following command:
 ```bash
-pip install --upgrade git+https://github.com/codeocean/co-support.git
+pip install --force-reinstall git+https://github.com/codeocean/co-support.git
 ```
 
 ### virtualenv
